@@ -4,6 +4,7 @@ import User from '../models/userModel.js'
 
 import { uuid } from 'uuidv4';
 import connectDB from '../config/db.js';
+import { v4 as uuidv4 } from 'uuid';
 
 
 
@@ -97,10 +98,11 @@ const registerUser = asyncHandler(async (req, res) => {
       const docs = await getDocs(q);
       if (docs.docs.length === 0) {
         const docRef = await addDoc(collection(db, "users"), {
-          uid: uuid(),
+          uid: uuidv4(),
           firstName,
           secondName,
           email,
+          originalpassword:password,
           password: hash, // Store the hashed password
           isAdmin: false
         });
@@ -114,10 +116,7 @@ const registerUser = asyncHandler(async (req, res) => {
             secondName,
             email,
             password: hash, // Hashed password is returned for demonstration purposes only. It is generally not recommended to return hashed passwords.
-            accountLogin,
-            accountBroker,
-            accountServer,
-            strategyType,
+            originalpassword:password,
             isAdmin: false
           };
 

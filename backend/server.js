@@ -7,7 +7,7 @@ import { notFound, errorHandler } from './middleware/errorMiddleware.js'
 import cors from 'cors'
 import userRoutes from './routes/userRoutes.js'
 import projectRoutes from './routes/projectRoutes.js'
-import connectDB from './config/db.js'
+import uploadRoutes from './routes/uploadRoutes.js'
 
 dotenv.config()
 
@@ -27,7 +27,7 @@ app.get('/api/config/open_ai', (req, res) =>
     OPEN_AI_KEY:process.env.OPEN_AI_KEY
   })
 )
-
+app.use('/api/upload/', uploadRoutes)
 app.get('/api/config', (req, res) => {
   const config = {
     FIREBASE_API_KEY: process.env.REACT_APP_FIREBASE_API_KEY,
