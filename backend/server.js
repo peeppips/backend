@@ -8,6 +8,7 @@ import cors from 'cors'
 import userRoutes from './routes/userRoutes.js'
 import projectRoutes from './routes/projectRoutes.js'
 import uploadRoutes from './routes/uploadRoutes.js'
+import brokerRoutes from './routes/brokerRoutes.js'
 
 import Bugsnag from '@bugsnag/js'
 import BugsnagPluginExpress from '@bugsnag/plugin-express'
@@ -43,6 +44,8 @@ app.use(cors())
 app.use('/api/users', userRoutes)
 app.use('/api/projects',projectRoutes)
 app.use('/api/upload', uploadRoutes)
+app.use('/api/brokers', brokerRoutes)
+
 
 app.get('/api/config/open_ai', (req, res) =>
   res.send({

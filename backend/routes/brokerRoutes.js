@@ -5,7 +5,7 @@ import {
   getBrokerById,
   deleteBroker,
   updateBroker,
-} from './brokerControllers.js';
+} from '../controllers/brokerControllers.js';
 
 const router = express.Router();
 
