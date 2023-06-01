@@ -20,9 +20,9 @@ router
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile)
 router
-  .route('/:id')
+  .route('/:email')
   .delete(protect, admin, deleteUser)
-  .get(protect, getUserById)
+  .get(getUserById)
   .put(protect, admin, updateUser)
 
 export default router

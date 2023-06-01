@@ -235,9 +235,10 @@ const deleteUser = asyncHandler(async (req, res) => {
 // @route   GET /api/users/:id
 // @access  Private/Admin
 const getUserById = asyncHandler(async (req, res) => {
-
-  const { email } = req.body;
-
+  try {
+    
+  const  email  = req.params.email;
+  console.log("email is ",email)
   const q = query(collection(db, "users"), where("email", "==",email));
   const docs = await getDocs(q);
 
@@ -254,7 +255,11 @@ const getUserById = asyncHandler(async (req, res) => {
   else{
     res.json(user);
   }
+  }  } catch (error) {
+    
   }
+  
+
  
 })
 
