@@ -9,6 +9,10 @@ import userRoutes from './routes/userRoutes.js'
 import projectRoutes from './routes/projectRoutes.js'
 import uploadRoutes from './routes/uploadRoutes.js'
 
+import Bugsnag from '@bugsnag/js'
+import BugsnagPluginExpress from '@bugsnag/plugin-express'
+
+
 dotenv.config()
 
 
@@ -18,16 +22,34 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'))
 }
 
+Bugsnag.start({
+  apiKey: process.env.BUGNAG_API,
+  plugins: [BugsnagPluginExpress]
+})
+
+const middleware = Bugsnag.getPlugin('express')
+
+// This must be the first piece of middleware in the stack.
+// It can only capture errors in downstream middleware
+// app.use(middleware.requestHandler)
+
+/* all other middleware and application routes go here */
+
+// This handles any errors that Express catches. This needs to go before other
+// error handlers. BugSnag will call the `next` error handler if it exists.
+// app.use(middleware.errorHandler)
 app.use(express.json())
 app.use(cors())
 app.use('/api/users', userRoutes)
 app.use('/api/projects',projectRoutes)
+app.use('/api/upload', uploadRoutes)
+
 app.get('/api/config/open_ai', (req, res) =>
   res.send({
     OPEN_AI_KEY:process.env.OPEN_AI_KEY
   })
 )
-app.use('/api/upload/', uploadRoutes)
+
 app.get('/api/config', (req, res) => {
   const config = {
     FIREBASE_API_KEY: process.env.REACT_APP_FIREBASE_API_KEY,

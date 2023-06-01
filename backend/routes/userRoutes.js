@@ -1,4 +1,5 @@
 import express from 'express'
+
 const router = express.Router()
 import {
   authUser,
@@ -21,7 +22,7 @@ router
 router
   .route('/:id')
   .delete(protect, admin, deleteUser)
-  .get(protect, admin, getUserById)
+  .get(protect, getUserById)
   .put(protect, admin, updateUser)
 
 export default router

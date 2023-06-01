@@ -61,12 +61,24 @@ const authUser = asyncHandler(async (req, res) => {
     const user = docs.docs[0].data();
     const hashedPassword = user.password;
 
-    bcrypt.compare(password, hashedPassword, function(err, result) {
+    bcrypt.compare(password, hashedPassword, async function(err, result) {
       if (result) {
         console.log("Password matched!");
-        console.log(user)
-        // Handle successful authentication here
-        res.json(user);
+        console.log(user);
+
+        const x = query(collection(db, "projects"), where("email", "==", user.email));
+        const projectsref = await getDocs(x);
+      
+        if (projectsref.docs.length > 0) {
+          const projects = projectsref.docs.map((doc) => doc.data());
+          console.log('Projects:', projects);
+
+          const token = generateToken(user.uid); // Assuming generateToken is a function that generates a token using the user's UID.
+          res.json({ user, projects, token });
+        } else {
+          const token = generateToken(user.uid);
+          res.json({ user, token });
+        }
       } else {
         console.log("Password does not match!");
         res.status(400).json({ error: "Invalid Email or Password" });
@@ -76,6 +88,7 @@ const authUser = asyncHandler(async (req, res) => {
     res.status(400).json({ error: "Invalid Email or Password" });
   }
 });
+
 
 
 // @desc    Register a new user
@@ -226,13 +239,23 @@ const getUserById = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
   const q = query(collection(db, "users"), where("email", "==",email));
+  const docs = await getDocs(q);
 
-  if (user) {
-    res.json(user)
-  } else {
-    res.status(404)
-    throw new Error('User not found')
+  if (docs.docs.length > 0) {
+    const user = docs.docs[0].data();
+    const x = query(collection(db, "projects"), where("email", "==", user.email));
+    const projectsref = await getDocs(x);
+  
+    if (projectsref.docs.length > 0) {
+      const projects = projectsref.docs.map((doc) => doc.data());
+      console.log('Projects:', projects);
+      res.json({user,projects});
+    }
+  else{
+    res.json(user);
   }
+  }
+ 
 })
 
 // @desc    Update user
