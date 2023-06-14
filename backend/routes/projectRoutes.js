@@ -18,7 +18,7 @@ router.get('/', getAllProjects);
 
 // Get a project by ID
 router.get('/:id', getProjectById);
-router.get('/user/:userEmail',getProjectByUser)
+router.get('/user/:user',getProjectByUser)
 
 // Delete a project by ID
 router.delete('/:id', deleteProject);

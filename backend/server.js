@@ -9,6 +9,10 @@ import userRoutes from './routes/userRoutes.js'
 import projectRoutes from './routes/projectRoutes.js'
 import uploadRoutes from './routes/uploadRoutes.js'
 import brokerRoutes from './routes/brokerRoutes.js'
+import accountRoutes from './routes/accountRoutes.js'
+import serverRoutes from './routes/serverRoutes.js'
+import referalRoutes from './routes/referralRoutes.js'
+import creditRoutes from './routes/creditRoutes.js'
 
 import Bugsnag from '@bugsnag/js'
 import BugsnagPluginExpress from '@bugsnag/plugin-express'
@@ -45,7 +49,10 @@ app.use('/api/users', userRoutes)
 app.use('/api/projects',projectRoutes)
 app.use('/api/upload', uploadRoutes)
 app.use('/api/brokers', brokerRoutes)
-
+app.use('/api/accounts', accountRoutes)
+app.use('/api/servers', serverRoutes)
+app.use('/api/referals', referalRoutes)
+app.use('/api/credits',creditRoutes)
 
 app.get('/api/config/open_ai', (req, res) =>
   res.send({

@@ -53,32 +53,21 @@ const db = getFirestore(app);
 // @access  Public
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-
+  console.log("req body is ",req.body.email)
   const q = query(collection(db, "users"), where("email", "==", email));
   const docs = await getDocs(q);
 
   if (docs.docs.length > 0) {
     const user = docs.docs[0].data();
+    console.log(user)
     const hashedPassword = user.password;
 
     bcrypt.compare(password, hashedPassword, async function(err, result) {
       if (result) {
         console.log("Password matched!");
         console.log(user);
-
-        const x = query(collection(db, "projects"), where("email", "==", user.email));
-        const projectsref = await getDocs(x);
-      
-        if (projectsref.docs.length > 0) {
-          const projects = projectsref.docs.map((doc) => doc.data());
-          console.log('Projects:', projects);
-
-          const token = generateToken(user.uid); // Assuming generateToken is a function that generates a token using the user's UID.
-          res.json({ user, projects, token });
-        } else {
-          const token = generateToken(user.uid);
-          res.json({ user, token });
-        }
+        res.json(user);
+        
       } else {
         console.log("Password does not match!");
         res.status(400).json({ error: "Invalid Email or Password" });
@@ -253,7 +242,8 @@ const getUserById = asyncHandler(async (req, res) => {
       res.json({user,projects});
     }
   else{
-    res.json(user);
+    const projects = []
+    res.json(user,projects);
   }
   }  } catch (error) {
     
@@ -267,26 +257,53 @@ const getUserById = asyncHandler(async (req, res) => {
 // @route   PUT /api/users/:id
 // @access  Private/Admin
 const updateUser = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id)
+  try {
+    const email = req.params.email;
+    console.log("email is ", email);
 
-  if (user) {
-    user.name = req.body.name || user.name
-    user.email = req.body.email || user.email
-    user.isAdmin = req.body.isAdmin
+    const userQuery = query(collection(db, "users"), where("email", "==", email));
+    const userSnapshot = await getDocs(userQuery);
 
-    const updatedUser = await user.save()
+    if (userSnapshot.docs.length > 0) {
+      const userDoc = userSnapshot.docs[0];
+      const userRef = doc(db, "users", userDoc.id);
+      const user = userDoc.data();
 
-    res.json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      isAdmin: updatedUser.isAdmin,
-    })
-  } else {
-    res.status(404)
-    throw new Error('User not found')
+      user.firstName = req.body.firstName || user.firstName;
+      user.secondName = req.body.secondName || user.secondName;
+      user.profile_pic = req.body.profile_pic || user.profile_pic;
+      user.email = req.body.email || user.email;
+
+      if (req.body.password) {
+        // Update the password logic for Firebase Authentication
+        // You can use the Firebase Authentication SDK to update the password
+        // Example: await updatePassword(auth.currentUser, req.body.password);
+        user.password = req.body.password
+      }
+
+      await updateDoc(userRef, user);
+
+      const updatedUserSnapshot = await getDoc(userRef);
+      const updatedUser = updatedUserSnapshot.data();
+
+    
+      res.json({
+        firstName: updatedUser.firstName,
+        secondName: updatedUser.secondName,
+        email: updatedUser.email,
+        isAdmin: updatedUser.isAdmin,
+      });
+    } else {
+      res.status(404);
+      throw new Error("User not found");
+    }
+  } catch (error) {
+    // Handle the error
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
   }
-})
+});
+
 
 export {
   authUser,

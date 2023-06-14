@@ -74,57 +74,46 @@ const getAllBrokers = async (req, res) => {
 // Get a broker by ID
 const getBrokerById = async (req, res) => {
   try {
-    const brokerId = req.params.id;
-    const broker = await Broker.findById(brokerId);
-    if (!broker) {
-      res.status(404).json({ error: 'Broker not found' });
-      return;
+    const brokerUuid = req.params.uuid;
+    const q = query(collection(db, "brokers"), where("uuid", "==", brokerUuid));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.docs.length > 0) {
+      const brokerData = querySnapshot.docs[0].data();
+      res.json({ broker: brokerData });
+    } else {
+      res.status(404).json({ error: "No Such Broker" });
     }
-    res.status(200).json(broker);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
-// Delete a broker by ID
 const deleteBroker = async (req, res) => {
   try {
-    const brokerId = req.params.id;
-    const deletedBroker = await Broker.findByIdAndDelete(brokerId);
-    if (!deletedBroker) {
-      res.status(404).json({ error: 'Broker not found' });
-      return;
-    }
-    res.status(200).json({ message: 'Broker deleted' });
+    const brokerUuid = req.params.uuid;
+    
+    const brokerRef = doc(db, "brokers", brokerUuid);
+    await deleteDoc(brokerRef);
+
+    res.json({ message: "Broker deleted successfully" });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
 // Update a broker by ID
 const updateBroker = async (req, res) => {
   try {
-    const brokerId = req.params.id;
-    const { name, country, regulations, servers } = req.body;
+    const brokerUuid = req.params.uuid;
+    const brokerData = req.body; // Assuming the updated broker data is sent in the request body
+    
+    const brokerRef = doc(db, "brokers", brokerUuid);
+    await updateDoc(brokerRef, brokerData);
 
-    const updatedBroker = await Broker.findByIdAndUpdate(
-      brokerId,
-      {
-        name,
-        country,
-        regulations,
-        servers,
-      },
-      { new: true }
-    );
-
-    if (!updatedBroker) {
-      res.status(404).json({ error: 'Broker not found' });
-      return;
-    }
-    res.status(200).json(updatedBroker);
+    res.json({ message: "Broker updated successfully" });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 

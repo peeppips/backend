@@ -4,8 +4,9 @@ import {
   getAllReferals,
   getReferalById,
   deleteReferal,
-  updateReferal,
-} from './referalController';
+  getReferalByUser
+  // updateReferal,
+} from '../controllers/referalController.js';
 
 const router = express.Router();
 
@@ -18,10 +19,12 @@ router.get('/', getAllReferals);
 // Get a referral by ID
 router.get('/:id', getReferalById);
 
+router.get('/user/:user',getReferalByUser);
+
 // Delete a referral by ID
 router.delete('/:id', deleteReferal);
 
 // Update a referral by ID
-router.put('/:id', updateReferal);
+// router.put('/:id', updateReferal);
 
 export default router;

@@ -23,6 +23,6 @@ router
   .route('/:email')
   .delete(protect, admin, deleteUser)
   .get(getUserById)
-  .put(protect, admin, updateUser)
+  .put(updateUser)
 
 export default router

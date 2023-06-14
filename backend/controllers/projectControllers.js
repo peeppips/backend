@@ -32,12 +32,12 @@ const createProject = async (req, res) => {
   try {
     
     console.log("project is ",req.body)
-    const {resellEstimate,botPlatform,broker,server,uploadedFilePath,accountNumber,password,email} = req.body
+    const {resellEstimate,botPlatform,uploadedFilePath,status,accounts,name,user} = req.body
 
-    const docRef = await addDoc(collection(db, "projects"),{resellEstimate,botPlatform,broker,server,uploadedFilePath,accountNumber,password,email});
+    const docRef = await addDoc(collection(db, "projects"),{resellEstimate,botPlatform,uploadedFilePath,status,accounts,name,user});
     console.log("doc ref is ", docRef);
     if (docRef) {
-      const newProject = {resellEstimate,botPlatform,broker,server,uploadedFilePath,accountNumber,password,email}
+      const newProject = {resellEstimate,botPlatform,uploadedFilePath,status,accounts,name,user}
       res.status(201).json(newProject);
     }
     else {
@@ -53,7 +53,9 @@ const createProject = async (req, res) => {
 // Get all projects
 const getAllProjects = async (req, res) => {
   try {
-    const projects = await Project.find();
+    const x = query(collection(db, "projects"));
+    const projectRef = await getDocs(x);
+    const projects = projectRef.docs.map((doc) => doc.data());
     res.status(200).json(projects);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -63,31 +65,36 @@ const getAllProjects = async (req, res) => {
 // Get a project by ID
 const getProjectById = async (req, res) => {
   try {
-    const projectId = req.params.id;
-    const project = await Project.findById(projectId);
-    if (!project) {
-      res.status(404).json({ error: 'Project not found' });
-      return;
+    const projectUuid = req.params.uuid;
+    const q = query(collection(db, "projects"), where("uuid", "==", projectUuid));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.docs.length > 0) {
+      const projectData = querySnapshot.docs[0].data();
+      res.json({ project: projectData });
+    } else {
+      res.status(404).json({ error: "No Such Project" });
     }
-    res.status(200).json(project);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
 const getProjectByUser = async (req,res)=>{
   try {
     
-    const userEmail = req.params.userEmail;
-    const x = query(collection(db, "projects"), where("email", "==", userEmail));
+    const user = req.params.user;
+    const x = query(collection(db, "projects"), where("user", "==", user));
     const projectsref = await getDocs(x);
     console.log("projecy iser ",projectsref)
     if (projectsref.docs.length > 0) {
       const projects = projectsref.docs.map((doc) => doc.data());
       console.log('User projects:', projects);
-        res.json( projects );
+      res.json( projects );
     } else {
-      res.json({ error:"No projects for this user" });
+      const projects = []
+      res.json( projects );
+      // res.json({ error:"No projects for this user" });
     }
   } catch (error) {
     console.log(error)
@@ -97,46 +104,29 @@ const getProjectByUser = async (req,res)=>{
 // Delete a project by ID
 const deleteProject = async (req, res) => {
   try {
-    const projectId = req.params.id;
-    const deletedProject = await Project.findByIdAndDelete(projectId);
-    if (!deletedProject) {
-      res.status(404).json({ error: 'Project not found' });
-      return;
-    }
-    res.status(200).json({ message: 'Project deleted' });
+    const projectUuid = req.params.uuid;
+    
+    const projectRef = doc(db, "projects", projectUuid);
+    await deleteDoc(projectRef);
+
+    res.json({ message: "Project deleted successfully" });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
 // Update a project by ID
 const updateProject = async (req, res) => {
   try {
-    const projectId = req.params.id;
-    const { user, projectType, apiKeyDeriv, mkt, lotSize, stopLoss, takeProfit, name } = req.body;
+    const projectUuid = req.params.uuid;
+    const projectData = req.body; // Assuming the updated broker data is sent in the request body
+    
+    const projectRef = doc(db, "brokers", projectUuid);
+    await updateDoc(projectRef, projectData);
 
-    const updatedProject = await Project.findByIdAndUpdate(
-      projectId,
-      {
-        user,
-        projectType,
-        apiKeyDeriv,
-        mkt,
-        lotSize,
-        stopLoss,
-        takeProfit,
-        name,
-      },
-      { new: true }
-    );
-
-    if (!updatedProject) {
-      res.status(404).json({ error: 'Project not found' });
-      return;
-    }
-    res.status(200).json(updatedProject);
+    res.json({ message: "Project updated successfully" });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
