@@ -111,9 +111,10 @@ const getProjectByUser = async (req,res)=>{
 // Delete a project by ID
 const deleteProject = async (req, res) => {
   try {
-    const projectUuid = req.params.uuid;
-    
+    const projectUuid = req.params.id;
+    console.log(projectUuid)
     const projectRef = doc(db, "projects", projectUuid);
+    
     await deleteDoc(projectRef);
 
     res.json({ message: "Project deleted successfully" });

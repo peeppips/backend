@@ -94,6 +94,7 @@ const registerUser = asyncHandler(async (req, res) => {
       if (docs.docs.length === 0) {
         const docRef = await addDoc(collection(db, "users"), {
           uid: uuidv4(),
+          unique_id:uuidv4().replace(/-/g, '').substring(0, 8),
           firstName,
           secondName,
           email,
@@ -107,6 +108,7 @@ const registerUser = asyncHandler(async (req, res) => {
         if (docRef) {
           const newUser = {
             uid: docRef.id,
+            unique_id,
             firstName,
             secondName,
             email,
